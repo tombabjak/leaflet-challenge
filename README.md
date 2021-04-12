@@ -11,5 +11,5 @@ Level 1: Basic Visualization (All Earthquakes, Past 7 Days)
 
 Level 2: More Data (Optional)   
 - cd: Leaflet-Step-2   
-- Data: tectonicplates/data.json (https://github.com/fraxen/tectonicplates)
+- Data: tectplates/data.json (https://github.com/fraxen/tectonicplates)
 

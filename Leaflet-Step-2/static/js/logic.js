@@ -75,7 +75,7 @@ d3.json(url, function(response) {
         layers: [satellite, magLayer]
     });
 
-    filePath = 'tectonicplates/data.json'
+    filePath = 'tectplates/data.json'
 
     let tectLayer = L.layerGroup().addTo(myMap)
 

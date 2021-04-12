@@ -31,14 +31,6 @@ var baseMaps = {
     "Dark Map": darkmap
 };
 
-var myMap = L.map("mapid", {
-    center: [35, -100],
-    zoom: 4,
-    layers: [satellite]
-});
-  
-L.control.layers(baseMaps).addTo(myMap);
-
 var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 d3.json(url, function(response) {
@@ -61,15 +53,47 @@ d3.json(url, function(response) {
     };
 
     var data = response.features;
+    var magMarkers = [];
 
     for (var i = 0; i < data.length; i++) {
-        L.circle([data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]], {
-            fillOpacity: 1,
-            weight: 0.5,
-            color: `black`,
-            fillColor: getColor(data[i].geometry.coordinates[2]),
-            radius: normRadius(data[i].properties.mag)
-        }).bindPopup("<h1>" + data[i].properties.place + "</h1><hr><h2>Magnitude: " + data[i].properties.mag + " / Depth: " + data[i].geometry.coordinates[2] +" km</h2>").addTo(myMap);
+        magMarkers.push(
+            L.circle([data[i].geometry.coordinates[1], data[i].geometry.coordinates[0]], {
+                fillOpacity: 1,
+                weight: 0.5,
+                color: `black`,
+                fillColor: getColor(data[i].geometry.coordinates[2]),
+                radius: normRadius(data[i].properties.mag)
+            }).bindPopup("<h1>" + data[i].properties.place + "</h1><hr><h2>Magnitude: " + data[i].properties.mag + " / Depth: " + data[i].geometry.coordinates[2] +" km</h2>")
+        );
+    };
+
+    var magLayer = L.layerGroup(magMarkers);
+
+    var myMap = L.map("mapid", {
+        center: [35, -100],
+        zoom: 4,
+        layers: [satellite, magLayer]
+    });
+
+    filePath = 'tectonicplates/data.json'
+
+    let tectLayer = L.layerGroup().addTo(myMap)
+
+    function addMyData (feature, layer) {
+        tectLayer.addLayer(layer)
+    };
+
+    let myLayerOptions = {
+        onEachFeature: addMyData
+    }
+
+    d3.json(filePath, function(d) {
+        L.geoJson(d, myLayerOptions).addTo(myMap);
+    })
+
+    var overlayMaps = {
+        "Earthquakes": magLayer,
+        "Tectonic Plates": tectLayer
     };
 
     var legend = L.control({ position: 'bottomright' })
@@ -84,9 +108,10 @@ d3.json(url, function(response) {
             div.innerHTML += '<i style="background:'+getColor(magColor[i])+'"></i><span>'+mags[i]+'</span><br>';
         } return div;
     };
+  
+    L.control.layers(baseMaps, overlayMaps).addTo(myMap);
 
     legend.addTo(myMap);
-
 });
 
 
